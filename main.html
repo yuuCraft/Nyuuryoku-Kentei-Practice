@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>入力検定練習ソフト V1.00.0</title>
+
+<style>
+:root{
+  --bg:#f5f5f7;--panel:#e0e0e6;--text:#222;
+  --accent:#3a7afe;--danger:#e74c3c;
+  --border:#c9c9cf
+}
+.dark{
+  --bg:#0f1115;--panel:#1a1f27;--text:#fff;
+  --accent:#6aa0ff;--danger:#ff6b5a;
+  --border:#2a2f37
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-family:system-ui}
+
+header{
+  display:flex;gap:.5rem;align-items:center;
+  padding:.75rem 1rem;border-bottom:1px solid var(--border);
+  background:var(--panel);position:sticky;top:0
+}
+header .spacer{flex:1}
+button,.toggle{
+  border:1px solid var(--border);
+  background:transparent;
+  color:var(--text);
+  padding:.5rem .75rem;
+  border-radius:.5rem;
+  cursor:pointer
+}
+button.primary{border-color:var(--accent);color:var(--accent)}
+button.danger{border-color:var(--danger);color:var(--danger)}
+.dark button{color:#fff}
+
+.container{padding:1rem}
+.panel{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:.75rem;
+  padding:.75rem
+}
+textarea{
+  width:100%;
+  min-height:42vh;
+  border:1px dashed var(--border);
+  border-radius:.5rem;
+  padding:.75rem;
+  background:#d0d0d6
+}
+.dark textarea{background:#222;color:#fff}
+
+.row{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-top:.75rem}
+.info{
+  border:1px dashed var(--border);
+  border-radius:.5rem;
+  padding:.5rem .75rem
+}
+.badge{
+  border:1px solid var(--border);
+  border-radius:.5rem;
+  padding:.25rem .5rem;
+  font-size:.85rem
+}
+.score{font-size:1.25rem;font-weight:700;color:var(--accent)}
+
+#timerLabel.end{color:var(--danger);font-weight:700}
+
+/* ガイド */
+.modal{
+  position:fixed;inset:0;
+  background:rgba(0,0,0,.4);
+  display:none;align-items:center;justify-content:center
+}
+.modal .box{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:.75rem;
+  padding:1rem;
+  width:min(600px,90%)
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <button id="saveTxtBtn" class="primary">txtで保存</button>
+  <button id="saveWebBtn" class="primary">Webで保存</button>
+  <button id="lockBtn">キーボードロック</button>
+  <span id="lockState">未ロック</span>
+  <button id="guideBtn">ガイド</button>
+  <div class="spacer"></div>
+  <label class="toggle"><input type="checkbox" id="darkToggle"> ダークモード</label>
+  <button id="clearBtn" class="danger">内容削除</button>
+</header>
+
+<div class="container">
+<section class="panel">
+
+<textarea id="inputArea" placeholder="ここに文章を入力してください…"></textarea>
+
+<div class="row">
+<div class="info">
+  <span class="badge">タイマー</span>
+  <span id="timerLabel">00:00:00</span>
+
+  <div style="margin-top:.5rem">
+    <input id="h" type="number" min="0" value="0" style="width:4rem">時
+    <input id="m" type="number" min="0" value="1" style="width:4rem">分
+    <input id="s" type="number" min="0" value="0" style="width:4rem">秒
+  </div>
+
+  <div style="margin-top:.5rem">
+    <button id="start">開始</button>
+    <button id="pause">一時停止</button>
+    <button id="reset">リセット</button>
+  </div>
+
+  <div style="margin-top:.75rem">
+    <span class="badge">文字数</span> <span id="chars">0</span>
+    <span class="badge">行数</span> <span id="lines">0</span>
+  </div>
+</div>
+
+<div class="info">
+  <span class="badge">比較</span>
+  <textarea id="refArea" style="min-height:8rem"></textarea>
+  <button id="compare">比較実行</button>
+  <span id="score" class="score">—</span>
+</div>
+</div>
+
+</section>
+</div>
+
+<!-- ガイド -->
+<div id="guide" class="modal">
+  <div class="box">
+    <h3>ガイド</h3>
+    <ul>
+      <li>.TXTで保存：入力内容をTXTファイルで保存</li>
+      <li>Webで保存：次回起動時に復元</li>
+      <li>キーボードロック：入力不可／解除可能</li>
+      <li>タイマー：時・分・秒対応、終了で警告</li>
+      <li>文字数・行数：リアルタイム計測</li>
+      <li>比較：文章の誤字を検出・数値化</li>
+    </ul>
+    <button onclick="guide.style.display='none'">閉じる</button>
+  </div>
+</div>
+
+<script>
+/* 基本 */
+const input=inputArea, ref=refArea;
+const chars=document.getElementById("chars");
+const lines=document.getElementById("lines");
+function count(){
+  chars.textContent=input.value.length;
+  lines.textContent=input.value.split("\n").length;
+}
+input.oninput=count;count();
+
+/* txt保存 */
+saveTxtBtn.onclick=()=>{
+  const b=new Blob([input.value],{type:"text/plain"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(b);a.download="text.txt";a.click();
+};
+
+/* Web保存 */
+const KEY="toolSave";
+saveWebBtn.onclick=()=>{
+  localStorage.setItem(KEY,JSON.stringify({
+    i:input.value,r:ref.value,d:document.documentElement.classList.contains("dark")
+  }));
+  alert("Webに保存しました");
+};
+(()=>{const d=localStorage.getItem(KEY);
+if(d){const j=JSON.parse(d);
+input.value=j.i||"";ref.value=j.r||"";
+if(j.d){document.documentElement.classList.add("dark");darkToggle.checked=true;}
+count();}})();
+
+/* ロック */
+let lock=false;
+lockBtn.onclick=()=>{
+  lock=!lock;
+  input.readOnly=lock;ref.readOnly=lock;
+  lockState.textContent=lock?"ロック中":"未ロック";
+};
+
+/* ダーク */
+darkToggle.onchange=e=>{
+  document.documentElement.classList.toggle("dark",e.target.checked);
+};
+
+/* 削除 */
+clearBtn.onclick=()=>{
+  if(confirm("削除しますか？")){
+    input.value="";ref.value="";localStorage.removeItem(KEY);count();
+  }
+};
+
+/* タイマー */
+let rest=0,run=false,raf,beep;
+const lab=timerLabel;
+function fmt(ms){
+  let t=Math.floor(ms/1000);
+  return `${String(t/3600|0).padStart(2,"0")}:${String(t%3600/60|0).padStart(2,"0")}:${String(t%60).padStart(2,"0")}`;
+}
+function set(){
+  rest=(+h.value*3600+ +m.value*60+ +s.value)*1000;
+  lab.textContent=fmt(rest);
+  lab.classList.remove("end");
+}
+["h","m","s"].forEach(i=>window[i].onchange=set);set();
+
+function startBeep(){
+  const ctx=new AudioContext();
+  beep=setInterval(()=>{
+    const o=ctx.createOscillator();
+    o.frequency.value=1000;
+    o.connect(ctx.destination);
+    o.start();o.stop(ctx.currentTime+0.1);
+  },200);
+}
+function stopBeep(){clearInterval(beep)}
+
+start.onclick=()=>{
+  if(run)return;run=true;
+  const end=performance.now()+rest;
+  const tick=t=>{
+    rest=Math.max(0,end-t);lab.textContent=fmt(rest);
+    if(rest<=0){
+      run=false;lab.classList.add("end");startBeep();
+    }else raf=requestAnimationFrame(tick);
+  };
+  raf=requestAnimationFrame(tick);
+};
+pause.onclick=()=>{run=false;cancelAnimationFrame(raf)};
+reset.onclick=()=>{run=false;stopBeep();set()};
+
+/* 比較（誤字数） */
+compare.onclick = () => {
+  const a = input.value;
+  const b = ref.value;
+
+  let match = 0;
+  const len = Math.max(a.length, b.length);
+
+  for (let n = 0; n < len; n++) {
+    if ((a[n] || "") === (b[n] || "")) {
+      match++;
+    }
+  }
+
+  const miss = len - match;
+  score.textContent = miss;
+};
+
+
+/* ガイド */
+guideBtn.onclick=()=>guide.style.display="flex";
+</script>
+
+</body>
+</html>

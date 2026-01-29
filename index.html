@@ -2,270 +2,294 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>入力検定練習ソフト V1.50 Webリリース版</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>入力検定練習ソフト V1.50 Web</title>
 
 <style>
 :root{
-  --bg:#f5f5f7;--panel:#e0e0e6;--text:#222;
-  --accent:#3a7afe;--danger:#e74c3c;
-  --border:#c9c9cf
+  --bg:#f3f4f6;
+  --card:#ffffff;
+  --text:#111;
+  --accent:#2563eb;
+  --danger:#dc2626;
+  --border:#d1d5db;
+  --shadow:0 10px 25px rgba(0,0,0,.08);
+  --ok:#16a34a;
+  --miss:#dc2626;
+  --none:#9ca3af;
 }
-.dark{
-  --bg:#0f1115;--panel:#1a1f27;--text:#fff;
-  --accent:#6aa0ff;--danger:#ff6b5a;
-  --border:#2a2f37
-}
-*{box-sizing:border-box}
-html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-family:system-ui}
 
-header{
-  display:flex;gap:.5rem;align-items:center;
-  padding:.75rem 1rem;border-bottom:1px solid var(--border);
-  background:var(--panel);position:sticky;top:0
+/* Win11 Dark */
+.dark{
+  --bg:#0f1115;
+  --card:#1c1f26;
+  --text:#e5e7eb;
+  --accent:#60a5fa;
+  --border:#2a2f37;
+  --shadow:0 10px 30px rgba(0,0,0,.6);
 }
-header .spacer{flex:1}
-button,.toggle{
+
+*{box-sizing:border-box}
+html,body{
+  margin:0;
+  background:var(--bg);
+  font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
+  color:var(--text);
+}
+
+/* Header */
+header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:1rem;
+  border-bottom:1px solid var(--border);
+  background:linear-gradient(#fafafa,#f0f0f0);
+}
+.dark header{
+  background:linear-gradient(#1f2937,#111827);
+}
+
+h1{font-size:1.05rem;margin:0}
+
+/* Layout */
+.container{
+  max-width:1100px;
+  margin:1.5rem auto;
+  padding:0 1rem;
+}
+
+.card{
+  background:var(--card);
+  border-radius:14px;
+  box-shadow:var(--shadow);
+  padding:1.2rem;
+  margin-bottom:1rem;
+}
+
+/* Buttons */
+button{
   border:1px solid var(--border);
   background:transparent;
   color:var(--text);
-  padding:.5rem .75rem;
-  border-radius:.5rem;
-  cursor:pointer
+  padding:.55rem .9rem;
+  border-radius:8px;
+  cursor:pointer;
 }
-button.primary{border-color:var(--accent);color:var(--accent)}
-button.danger{border-color:var(--danger);color:var(--danger)}
-.dark button{color:#fff}
+button.primary{
+  background:var(--accent);
+  color:#fff;
+  border-color:var(--accent);
+}
+button.danger{
+  background:var(--danger);
+  color:#fff;
+  border-color:var(--danger);
+}
 
-.container{padding:1rem}
-.panel{
-  background:var(--panel);
-  border:1px solid var(--border);
-  border-radius:.75rem;
-  padding:.75rem
-}
+/* Textarea */
 textarea{
   width:100%;
-  min-height:42vh;
-  border:1px dashed var(--border);
-  border-radius:.5rem;
-  padding:.75rem;
-  background:#d0d0d6
-}
-.dark textarea{background:#222;color:#fff}
-
-.row{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-top:.75rem}
-.info{
-  border:1px dashed var(--border);
-  border-radius:.5rem;
-  padding:.5rem .75rem
-}
-.badge{
-  border:1px solid var(--border);
-  border-radius:.5rem;
-  padding:.25rem .5rem;
-  font-size:.85rem
-}
-.score{font-size:1.25rem;font-weight:700;color:var(--accent)}
-
-#timerLabel.end{color:var(--danger);font-weight:700}
-
-/* ガイド */
-.modal{
-  position:fixed;inset:0;
-  background:rgba(0,0,0,.4);
-  display:none;align-items:center;justify-content:center
-}
-.modal .box{
-  background:var(--panel);
-  border:1px solid var(--border);
-  border-radius:.75rem;
+  min-height:240px;
+  resize:vertical;
   padding:1rem;
-  width:min(600px,90%)
+  border-radius:10px;
+  border:1px solid var(--border);
+  font-size:1rem;
+  background:#fff;
+  color:#111;
 }
+.dark textarea{
+  background:#111827;
+  color:#e5e7eb;
+  border-color:#374151;
+}
+
+/* Grid */
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:1rem;
+}
+@media(max-width:800px){
+  .grid{grid-template-columns:1fr}
+}
+
+/* Timer */
+.timer{
+  font-size:2.3rem;
+  font-weight:800;
+}
+
+/* Compare */
+.score{
+  font-size:2.8rem;
+  font-weight:800;
+  text-align:center;
+  color:var(--accent);
+}
+
+.diff{
+  margin-top:.75rem;
+  padding:.75rem;
+  border-radius:8px;
+  background:rgba(0,0,0,.05);
+  font-family:monospace;
+  white-space:pre-wrap;
+}
+.dark .diff{background:rgba(255,255,255,.05)}
+
+.ok{color:var(--ok)}
+.miss{color:var(--miss)}
+.none{color:var(--none)}
 </style>
 </head>
 
 <body>
 
 <header>
-  <button id="saveTxtBtn" class="primary">txtで保存</button>
-  <button id="saveWebBtn" class="primary">Webで保存</button>
-  <button id="lockBtn">キーボードロック</button>
-  <span id="lockState">未ロック</span>
-  <button id="guideBtn">ガイド</button>
-  <div class="spacer"></div>
-  <label class="toggle"><input type="checkbox" id="darkToggle"> ダークモード</label>
-  <button id="clearBtn" class="danger">内容削除</button>
+  <h1>入力検定練習ソフト V1.50 Web</h1>
+  <label>
+    <input type="checkbox" id="darkToggle"> ダークモード
+  </label>
 </header>
 
 <div class="container">
-<section class="panel">
 
-<textarea id="inputArea" placeholder="ここに文章を入力してください…"></textarea>
+<div class="card">
+  <button id="saveTxtBtn">txt保存</button>
+  <button id="saveWebBtn">Web保存</button>
+  <button id="lockBtn">ロック</button>
+  <span id="lockState">未ロック</span>
+  <button id="clearBtn" class="danger">削除</button>
+</div>
 
-<div class="row">
-<div class="info">
-  <span class="badge">タイマー</span>
-  <span id="timerLabel">00:00:00</span>
-
+<div class="card">
+  <textarea id="inputArea" placeholder="ここに入力…"></textarea>
   <div style="margin-top:.5rem">
-    <input id="h" type="number" min="0" value="0" style="width:4rem">時
-    <input id="m" type="number" min="0" value="1" style="width:4rem">分
-    <input id="s" type="number" min="0" value="0" style="width:4rem">秒
+    文字数：<span id="chars">0</span>　
+    行数：<span id="lines">0</span>
   </div>
+</div>
 
+<div class="grid">
+
+<div class="card">
+  <div class="timer" id="timerLabel">00:00:00</div>
+  <input id="h" type="number" value="0" style="width:4rem">時
+  <input id="m" type="number" value="1" style="width:4rem">分
+  <input id="s" type="number" value="0" style="width:4rem">秒
   <div style="margin-top:.5rem">
-    <button id="start">開始</button>
-    <button id="pause">一時停止</button>
+    <button id="start" class="primary">開始</button>
+    <button id="pause">停止</button>
     <button id="reset">リセット</button>
   </div>
-
-  <div style="margin-top:.75rem">
-    <span class="badge">文字数</span> <span id="chars">0</span>
-    <span class="badge">行数</span> <span id="lines">0</span>
-  </div>
 </div>
 
-<div class="info">
-  <span class="badge">比較</span>
-  <textarea id="refArea" style="min-height:8rem"></textarea>
-  <button id="compare">比較実行</button>
-  <span id="score" class="score">—</span>
-</div>
-</div>
-
-</section>
+<div class="card">
+  <textarea id="refArea" placeholder="お手本文章"></textarea>
+  <button id="compare" class="primary">比較</button>
+  <div id="score" class="score">—</div>
+  <div id="diff" class="diff"></div>
 </div>
 
-<!-- ガイド -->
-<div id="guide" class="modal">
-  <div class="box">
-    <h3>ガイド</h3>
-    <ul>
-      <li>.TXTで保存：入力内容をTXTファイルで保存</li>
-      <li>Webで保存：次回起動時に復元</li>
-      <li>キーボードロック：入力不可／解除可能</li>
-      <li>タイマー：時・分・秒対応、終了で警告</li>
-      <li>文字数・行数：リアルタイム計測</li>
-      <li>比較：文章の誤字を検出・数値化</li>
-    </ul>
-    <button onclick="guide.style.display='none'">閉じる</button>
-  </div>
+</div>
 </div>
 
 <script>
-/* 基本 */
-const input=inputArea, ref=refArea;
-const chars=document.getElementById("chars");
-const lines=document.getElementById("lines");
+/* ===== DOM ===== */
+const input = document.getElementById("inputArea");
+const ref   = document.getElementById("refArea");
+const chars = document.getElementById("chars");
+const lines = document.getElementById("lines");
+
+/* count */
 function count(){
-  chars.textContent=input.value.length;
-  lines.textContent=input.value.split("\n").length;
+  chars.textContent = input.value.length;
+  lines.textContent = input.value.split("\n").length;
 }
-input.oninput=count;count();
+input.addEventListener("input", count);
+count();
 
-/* txt保存 */
-saveTxtBtn.onclick=()=>{
-  const b=new Blob([input.value],{type:"text/plain"});
-  const a=document.createElement("a");
-  a.href=URL.createObjectURL(b);a.download="text.txt";a.click();
-};
-
-/* Web保存 */
-const KEY="toolSave";
+/* save */
+const KEY="typingTool";
 saveWebBtn.onclick=()=>{
   localStorage.setItem(KEY,JSON.stringify({
-    i:input.value,r:ref.value,d:document.documentElement.classList.contains("dark")
+    i:input.value,
+    r:ref.value,
+    d:document.documentElement.classList.contains("dark")
   }));
-  alert("Webに保存しました");
 };
 (()=>{const d=localStorage.getItem(KEY);
-if(d){const j=JSON.parse(d);
-input.value=j.i||"";ref.value=j.r||"";
-if(j.d){document.documentElement.classList.add("dark");darkToggle.checked=true;}
-count();}})();
+if(d){
+  const j=JSON.parse(d);
+  input.value=j.i||"";ref.value=j.r||"";
+  if(j.d){document.documentElement.classList.add("dark");darkToggle.checked=true;}
+  count();
+}})();
 
-/* ロック */
-let lock=false;
-lockBtn.onclick=()=>{
-  lock=!lock;
-  input.readOnly=lock;ref.readOnly=lock;
-  lockState.textContent=lock?"ロック中":"未ロック";
-};
-
-/* ダーク */
+/* dark */
 darkToggle.onchange=e=>{
   document.documentElement.classList.toggle("dark",e.target.checked);
 };
 
-/* 削除 */
+/* lock */
+let lock=false;
+lockBtn.onclick=()=>{
+  lock=!lock;
+  input.readOnly=lock;
+  ref.readOnly=lock;
+  lockState.textContent=lock?"ロック中":"未ロック";
+};
+
+/* clear */
 clearBtn.onclick=()=>{
   if(confirm("削除しますか？")){
-    input.value="";ref.value="";localStorage.removeItem(KEY);count();
+    input.value="";ref.value="";
+    localStorage.removeItem(KEY);
+    count();
   }
 };
 
-/* タイマー */
-let rest=0,run=false,raf,beep;
-const lab=timerLabel;
+/* timer */
+let rest=0,run=false,raf;
 function fmt(ms){
   let t=Math.floor(ms/1000);
   return `${String(t/3600|0).padStart(2,"0")}:${String(t%3600/60|0).padStart(2,"0")}:${String(t%60).padStart(2,"0")}`;
 }
 function set(){
   rest=(+h.value*3600+ +m.value*60+ +s.value)*1000;
-  lab.textContent=fmt(rest);
-  lab.classList.remove("end");
+  timerLabel.textContent=fmt(rest);
 }
-["h","m","s"].forEach(i=>window[i].onchange=set);set();
-
-function startBeep(){
-  const ctx=new AudioContext();
-  beep=setInterval(()=>{
-    const o=ctx.createOscillator();
-    o.frequency.value=1000;
-    o.connect(ctx.destination);
-    o.start();o.stop(ctx.currentTime+0.1);
-  },200);
-}
-function stopBeep(){clearInterval(beep)}
-
+["h","m","s"].forEach(i=>window[i].onchange=set);
+set();
 start.onclick=()=>{
   if(run)return;run=true;
   const end=performance.now()+rest;
   const tick=t=>{
-    rest=Math.max(0,end-t);lab.textContent=fmt(rest);
-    if(rest<=0){
-      run=false;lab.classList.add("end");startBeep();
-    }else raf=requestAnimationFrame(tick);
+    rest=Math.max(0,end-t);
+    timerLabel.textContent=fmt(rest);
+    if(rest>0) raf=requestAnimationFrame(tick);
+    else run=false;
   };
   raf=requestAnimationFrame(tick);
 };
 pause.onclick=()=>{run=false;cancelAnimationFrame(raf)};
-reset.onclick=()=>{run=false;stopBeep();set()};
+reset.onclick=()=>{run=false;set()};
 
-/* 比較（誤字数） */
-compare.onclick = () => {
-  const a = input.value;
-  const b = ref.value;
-
-  let match = 0;
-  const len = Math.max(a.length, b.length);
-
-  for (let n = 0; n < len; n++) {
-    if ((a[n] || "") === (b[n] || "")) {
-      match++;
-    }
+/* compare visualize */
+compare.onclick=()=>{
+  const a=input.value,b=ref.value;
+  let out="",miss=0;
+  const len=Math.max(a.length,b.length);
+  for(let i=0;i<len;i++){
+    if(a[i]===b[i]) out+=`<span class="ok">${b[i]||" "}</span>`;
+    else if(a[i]==null) out+=`<span class="none">${b[i]}</span>`,miss++;
+    else out+=`<span class="miss">${b[i]||" "}</span>`,miss++;
   }
-
-  const miss = len - match;
-  score.textContent = miss;
+  diff.innerHTML=out;
+  score.textContent=miss;
 };
-
-
-/* ガイド */
-guideBtn.onclick=()=>guide.style.display="flex";
 </script>
 
 </body>

@@ -3,30 +3,30 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>入力検定練習ソフト V1.50 Web</title>
+<title>入力検定練習ソフト V1.52 Web-Release</title>
 
 <style>
 :root{
   --bg:#f3f4f6;
-  --card:#ffffff;
+  --card:rgba(255,255,255,.75);
   --text:#111;
   --accent:#2563eb;
   --danger:#dc2626;
-  --border:#d1d5db;
-  --shadow:0 10px 25px rgba(0,0,0,.08);
+  --border:rgba(0,0,0,.12);
+  --shadow:0 20px 40px rgba(0,0,0,.12);
   --ok:#16a34a;
   --miss:#dc2626;
   --none:#9ca3af;
 }
 
-/* Win11 Dark */
+/* Win11 Dark + Mica */
 .dark{
   --bg:#0f1115;
-  --card:#1c1f26;
+  --card:rgba(28,31,38,.7);
   --text:#e5e7eb;
   --accent:#60a5fa;
-  --border:#2a2f37;
-  --shadow:0 10px 30px rgba(0,0,0,.6);
+  --border:rgba(255,255,255,.12);
+  --shadow:0 25px 60px rgba(0,0,0,.7);
 }
 
 *{box-sizing:border-box}
@@ -37,43 +37,59 @@ html,body{
   color:var(--text);
 }
 
-/* Header */
+/* ===== Header ===== */
 header{
   display:flex;
   justify-content:space-between;
   align-items:center;
-  padding:1rem;
+  padding:1rem 1.2rem;
   border-bottom:1px solid var(--border);
-  background:linear-gradient(#fafafa,#f0f0f0);
+  backdrop-filter: blur(18px) saturate(140%);
+  background:linear-gradient(
+    180deg,
+    rgba(255,255,255,.65),
+    rgba(255,255,255,.35)
+  );
 }
 .dark header{
-  background:linear-gradient(#1f2937,#111827);
+  background:linear-gradient(
+    180deg,
+    rgba(30,41,59,.7),
+    rgba(17,24,39,.5)
+  );
 }
 
-h1{font-size:1.05rem;margin:0}
+/* ← タイトル小さく */
+h1{
+  font-size:1rem;
+  font-weight:600;
+  margin:0;
+}
 
-/* Layout */
+/* ===== Layout ===== */
 .container{
   max-width:1100px;
-  margin:1.5rem auto;
+  margin:1.6rem auto;
   padding:0 1rem;
 }
 
 .card{
   background:var(--card);
-  border-radius:14px;
+  backdrop-filter: blur(22px) saturate(160%);
+  border-radius:16px;
   box-shadow:var(--shadow);
   padding:1.2rem;
   margin-bottom:1rem;
+  border:1px solid var(--border);
 }
 
-/* Buttons */
+/* ===== Buttons ===== */
 button{
   border:1px solid var(--border);
   background:transparent;
   color:var(--text);
   padding:.55rem .9rem;
-  border-radius:8px;
+  border-radius:10px;
   cursor:pointer;
 }
 button.primary{
@@ -81,31 +97,31 @@ button.primary{
   color:#fff;
   border-color:var(--accent);
 }
+button.blue{
+  border:2px solid var(--accent);
+  color:var(--accent);
+}
 button.danger{
   background:var(--danger);
   color:#fff;
-  border-color:var(--danger);
 }
 
-/* Textarea */
+/* ===== Textarea ===== */
 textarea{
   width:100%;
-  min-height:240px;
-  resize:vertical;
+  min-height:220px;
   padding:1rem;
-  border-radius:10px;
+  border-radius:12px;
   border:1px solid var(--border);
   font-size:1rem;
-  background:#fff;
-  color:#111;
+  background:rgba(255,255,255,.6);
 }
 .dark textarea{
-  background:#111827;
+  background:rgba(17,24,39,.7);
   color:#e5e7eb;
-  border-color:#374151;
 }
 
-/* Grid */
+/* ===== Grid ===== */
 .grid{
   display:grid;
   grid-template-columns:1fr 1fr;
@@ -115,30 +131,21 @@ textarea{
   .grid{grid-template-columns:1fr}
 }
 
-/* Timer */
+/* ===== Timer / Compare ===== */
 .timer{
   font-size:2.3rem;
   font-weight:800;
 }
-
-/* Compare */
 .score{
-  font-size:2.8rem;
+  font-size:2.4rem;
   font-weight:800;
   text-align:center;
-  color:var(--accent);
 }
-
 .diff{
   margin-top:.75rem;
-  padding:.75rem;
-  border-radius:8px;
-  background:rgba(0,0,0,.05);
   font-family:monospace;
   white-space:pre-wrap;
 }
-.dark .diff{background:rgba(255,255,255,.05)}
-
 .ok{color:var(--ok)}
 .miss{color:var(--miss)}
 .none{color:var(--none)}
@@ -157,8 +164,8 @@ textarea{
 <div class="container">
 
 <div class="card">
-  <button id="saveTxtBtn">txt保存</button>
-  <button id="saveWebBtn">Web保存</button>
+  <button id="saveTxtBtn" class="blue">TXT保存</button>
+  <button id="saveWebBtn" class="blue">Web保存</button>
   <button id="lockBtn">ロック</button>
   <span id="lockState">未ロック</span>
   <button id="clearBtn" class="danger">削除</button>
@@ -175,6 +182,7 @@ textarea{
 <div class="grid">
 
 <div class="card">
+  <h3>＝タイマー＝</h3>
   <div class="timer" id="timerLabel">00:00:00</div>
   <input id="h" type="number" value="0" style="width:4rem">時
   <input id="m" type="number" value="1" style="width:4rem">分
@@ -187,6 +195,7 @@ textarea{
 </div>
 
 <div class="card">
+  <h3>＝比較＝</h3>
   <textarea id="refArea" placeholder="お手本文章"></textarea>
   <button id="compare" class="primary">比較</button>
   <div id="score" class="score">—</div>
@@ -196,44 +205,56 @@ textarea{
 </div>
 </div>
 
+<audio id="alarm" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
+
 <script>
-/* ===== DOM ===== */
-const input = document.getElementById("inputArea");
-const ref   = document.getElementById("refArea");
-const chars = document.getElementById("chars");
-const lines = document.getElementById("lines");
-
-/* count */
+/* ===== Count ===== */
+const input=inputArea, ref=refArea;
 function count(){
-  chars.textContent = input.value.length;
-  lines.textContent = input.value.split("\n").length;
+  chars.textContent=input.value.length;
+  lines.textContent=input.value.split("\n").length;
 }
-input.addEventListener("input", count);
-count();
+input.oninput=count;count();
 
-/* save */
-const KEY="typingTool";
+/* ===== Dark ===== */
+darkToggle.onchange=e=>{
+  document.documentElement.classList.toggle("dark",e.target.checked);
+  localStorage.setItem("dark",e.target.checked?1:0);
+};
+if(localStorage.getItem("dark")==="1"){
+  document.documentElement.classList.add("dark");
+  darkToggle.checked=true;
+}
+
+/* ===== Web保存（修正済） ===== */
+const KEY="typingToolSave";
 saveWebBtn.onclick=()=>{
   localStorage.setItem(KEY,JSON.stringify({
     i:input.value,
-    r:ref.value,
-    d:document.documentElement.classList.contains("dark")
+    r:ref.value
   }));
+  alert("Web保存しました");
 };
-(()=>{const d=localStorage.getItem(KEY);
-if(d){
-  const j=JSON.parse(d);
-  input.value=j.i||"";ref.value=j.r||"";
-  if(j.d){document.documentElement.classList.add("dark");darkToggle.checked=true;}
-  count();
-}})();
+(()=>{
+  const d=localStorage.getItem(KEY);
+  if(d){
+    const j=JSON.parse(d);
+    input.value=j.i||"";
+    ref.value=j.r||"";
+    count();
+  }
+})();
 
-/* dark */
-darkToggle.onchange=e=>{
-  document.documentElement.classList.toggle("dark",e.target.checked);
+/* ===== TXT保存 ===== */
+saveTxtBtn.onclick=()=>{
+  const b=new Blob([input.value],{type:"text/plain"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(b);
+  a.download="typing.txt";
+  a.click();
 };
 
-/* lock */
+/* ===== Lock ===== */
 let lock=false;
 lockBtn.onclick=()=>{
   lock=!lock;
@@ -242,7 +263,7 @@ lockBtn.onclick=()=>{
   lockState.textContent=lock?"ロック中":"未ロック";
 };
 
-/* clear */
+/* ===== Clear ===== */
 clearBtn.onclick=()=>{
   if(confirm("削除しますか？")){
     input.value="";ref.value="";
@@ -251,18 +272,17 @@ clearBtn.onclick=()=>{
   }
 };
 
-/* timer */
+/* ===== Timer + Alarm ===== */
 let rest=0,run=false,raf;
 function fmt(ms){
-  let t=Math.floor(ms/1000);
+  let t=ms/1000|0;
   return `${String(t/3600|0).padStart(2,"0")}:${String(t%3600/60|0).padStart(2,"0")}:${String(t%60).padStart(2,"0")}`;
 }
 function set(){
   rest=(+h.value*3600+ +m.value*60+ +s.value)*1000;
   timerLabel.textContent=fmt(rest);
 }
-["h","m","s"].forEach(i=>window[i].onchange=set);
-set();
+[h,m,s].forEach(i=>i.onchange=set);set();
 start.onclick=()=>{
   if(run)return;run=true;
   const end=performance.now()+rest;
@@ -270,22 +290,20 @@ start.onclick=()=>{
     rest=Math.max(0,end-t);
     timerLabel.textContent=fmt(rest);
     if(rest>0) raf=requestAnimationFrame(tick);
-    else run=false;
+    else{run=false;alarm.play();}
   };
   raf=requestAnimationFrame(tick);
 };
 pause.onclick=()=>{run=false;cancelAnimationFrame(raf)};
-reset.onclick=()=>{run=false;set()};
+reset.onclick=()=>{pause();set();};
 
-/* compare visualize */
+/* ===== Compare ===== */
 compare.onclick=()=>{
-  const a=input.value,b=ref.value;
   let out="",miss=0;
-  const len=Math.max(a.length,b.length);
-  for(let i=0;i<len;i++){
+  const a=input.value,b=ref.value;
+  for(let i=0;i<Math.max(a.length,b.length);i++){
     if(a[i]===b[i]) out+=`<span class="ok">${b[i]||" "}</span>`;
-    else if(a[i]==null) out+=`<span class="none">${b[i]}</span>`,miss++;
-    else out+=`<span class="miss">${b[i]||" "}</span>`,miss++;
+    else{out+=`<span class="miss">${b[i]||" "}</span>`;miss++;}
   }
   diff.innerHTML=out;
   score.textContent=miss;
